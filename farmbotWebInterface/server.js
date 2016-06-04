@@ -11,7 +11,7 @@ var serialPort = new SerialPort("/dev/ttyAMA0", {
 });
 
 serialPort.on("open", function () {
-  console.log('open');
+  console.log('serialportopen');
   serialPort.on('data', function(data) {
     console.log(data);
   });
@@ -33,10 +33,11 @@ serialPort.on("open", function () {
   io.on('connection', function (socket) {
     socket.on('movetoxy', function (xcord_in_hundredthsofamillimeter, ycord_in_hundredthsofamillimeter) {
       console.log("Moving to: (" + xcord_in_hundredthsofamillimeter + "|" + ycord_in_hundredthsofamillimeter + ")");
+      port.write('G00 X'+xcord_in_hundredthsofamillimeter+' Y'+ycord_in_hundredthsofamillimeter);
     })
-    console.log('A new connection is now open');
+    console.log('A new socket connection is now open');
     socket.on('disconnect', function () {
-      console.log('A connection was closed');
+      console.log('A socket connection was closed');
     });
   });
 
