@@ -6,7 +6,7 @@
 #define X_ENABLE_PIN       38
 
 const byte bPin = X_STEP_PIN;
-byte steps = 0;
+int steps = 0;
 long oldTempo;
 long userTempo = 120;
 
@@ -16,6 +16,7 @@ void setup() {
   pinMode(X_DIR_PIN, OUTPUT);
   pinMode(X_ENABLE_PIN, OUTPUT);
   digitalWrite(X_ENABLE_PIN, LOW);
+  digitalWrite(X_DIR_PIN, HIGH);
 }
 
 void buzz(int targetPin, long frequency, long length, long tempo) {
@@ -26,13 +27,7 @@ void buzz(int targetPin, long frequency, long length, long tempo) {
     delayMicroseconds(delayValue);
     digitalWrite(targetPin,LOW);
     delayMicroseconds(delayValue);
-    /*if(steps >= 100)
-    {
-      steps = 0;
-      digitalWrite(X_DIR_PIN, !digitalRead(X_DIR_PIN)); //Invert Stepper direction
-    }
-    else 
-      steps++;*/
+    steps++;
       //digitalWrite(X_DIR_PIN, !digitalRead(X_DIR_PIN));
   }
 }
@@ -45,7 +40,13 @@ void playNote(int noteInt, long length, long tempo = oldTempo,long breath = 0){
   if(breath > 0) { //take a short pause or 'breath' if specified
     delay(breath);
   }
-  digitalWrite(X_DIR_PIN, !digitalRead(X_DIR_PIN));
+  if(steps >= 3000)
+    {
+      steps = 0;
+      digitalWrite(X_DIR_PIN, !digitalRead(X_DIR_PIN)); //Invert Stepper direction
+    }
+    delay(1);
+  //digitalWrite(X_DIR_PIN, !digitalRead(X_DIR_PIN));
 }
 
 
