@@ -5,23 +5,18 @@ var io = require('socket.io')(http);
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort;
 
-// try {
+var serialPort = new SerialPort("/dev/ttyAMA0", {
+  baudrate: 9600,
+  parser: serialport.parsers.readline("\n")
+});
 
+serialPort.on("open", function () {
+  console.log('open');
+  serialPort.on('data', function(data) {
+    console.log(data);
+  });
+});
 
-//   var serialPort = new SerialPort("/dev/cu.usbmodem14131", {
-//     baudrate: 9600,
-//     parser: serialport.parsers.readline("\n")
-//   });
-//   serialPort.on("open", function () {
-//     console.log('open');
-//     serialPort.on('data', function (data) {
-//       console.log(data);
-//     });
-//   });
-//   //running index.html as simple web client here ==> see on ip:3000
-// } catch(exp){
-//   console.log(exp);
-// }
 
   app.use('/', express.static(__dirname + '/public'));
   app.use('/node_modules', express.static(__dirname + '/node_modules'));
