@@ -3,7 +3,7 @@
      return{
          restrict: 'A',
          link: function($scope, element){
-             window.addEventListener("resize", function(){
+            var onresize = function(){
                 //element 0 because element is a jqlite object and with [0] you get the native dom element 
                 var position = element[0].getBoundingClientRect();
                 $scope.zeropointpixel_x = position.left;
@@ -11,8 +11,9 @@
                 $scope.divwidth = (position.right -position.left);
                 $scope.divheight = (position.bottom - position.top);
                 $scope.$apply();
-             });
-            
+             };
+             window.addEventListener("resize", onresize);
+             setTimeout(onresize, 0);
          }
      }
             

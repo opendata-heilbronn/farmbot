@@ -4,14 +4,20 @@ html,body {
         height:100%;
 }
 div.controlPanel{
-    background-color: lightblue;
+    background-color: #7FFF00;
     width: 38.2%;
     height: 100%;
     float: left;
 }
 div.coordinateSystem{
-    background-color: gray;
+    background-color: #8B4513;
     width: 61.8%;
     height: 100%;
     float: left;
+}
+div.kreis {
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  background-color: chartreuse;
 }

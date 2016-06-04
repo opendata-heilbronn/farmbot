@@ -5,15 +5,15 @@ var io = require('socket.io')(http);
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort;
 
-var serialPort = new SerialPort("/dev/ttyAMA0", {
-  baudrate: 15200,
+var serialPort = new SerialPort("/dev/cu.usbmodem1411", {
+  baudrate: 115200,
   parser: serialport.parsers.readline("\n")
 });
 
 serialPort.on("open", function () {
   console.log('serialportopen');
-  serialPort.on('data', function(data) {
-    console.log(data);
+  serialPort.on('data', function(res) {
+    console.log(res);
   });
 });
 
@@ -33,7 +33,7 @@ serialPort.on("open", function () {
   io.on('connection', function (socket) {
     socket.on('movetoxy', function (xcord_in_hundredthsofamillimeter, ycord_in_hundredthsofamillimeter) {
       console.log("Moving to: (" + xcord_in_hundredthsofamillimeter + "|" + ycord_in_hundredthsofamillimeter + ")");
-      port.write('G00 X'+xcord_in_hundredthsofamillimeter+' Y'+ycord_in_hundredthsofamillimeter);
+      serialPort.write('G00 X'+xcord_in_hundredthsofamillimeter+' Y'+ycord_in_hundredthsofamillimeter+'\n');
     })
     console.log('A new socket connection is now open');
     socket.on('disconnect', function () {
