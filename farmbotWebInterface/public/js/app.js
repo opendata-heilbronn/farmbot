@@ -1,5 +1,5 @@
  angular.module('myApp', []).controller('myCtrl', function($scope) {
-      var socket = io.connect('http://localhost:3000');
+      var socket = io.connect('http://192.168.178.138:3000');
       $scope.fieldWidth=15000;
       $scope.fieldHeight=10000;
       $scope.doClick = function(event){
