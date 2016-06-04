@@ -6,7 +6,7 @@ var serialport = require("serialport");
 var SerialPort = serialport.SerialPort;
 
 var serialPort = new SerialPort("/dev/ttyAMA0", {
-  baudrate: 9600,
+  baudrate: 15200,
   parser: serialport.parsers.readline("\n")
 });
 
