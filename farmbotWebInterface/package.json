@@ -1,0 +1,13 @@
+{
+  "name": "FarmbotWebintrace",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "angular": "^1.5.6",
+    "express": "^4.13.4",
+    "socket.io": "^1.4.6"
+  }
+}
