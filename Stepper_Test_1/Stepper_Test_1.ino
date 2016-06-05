@@ -13,7 +13,7 @@
 const byte buttons[] = { 2,3,14 };
 
 // Define a stepper and the pins it will use
-AccelStepper stepper(1, 54, 55); // Defaults to 4 pins on 2, 3, 4, 5
+AccelStepper stepper(1, 54, 55); //InterfaceType (driver), stepPin, dirPin
 
 void setup()
 {  
@@ -24,7 +24,7 @@ void setup()
     pinMode(buttons[i], INPUT_PULLUP);
   }
   Serial.begin(115200);
-  stepper.setMaxSpeed(10000);
+  stepper.setMaxSpeed(1500);
   stepper.setAcceleration(5000);
 }
 bool forward = true;
@@ -41,10 +41,10 @@ void loop()
           stepper.moveTo(0);
           break;
         case 1:
-          stepper.moveTo(600);
+          stepper.moveTo(1500);
           break;
         case 2:
-          stepper.moveTo(1200);
+          stepper.moveTo(3000);
           break;
       }
     }
