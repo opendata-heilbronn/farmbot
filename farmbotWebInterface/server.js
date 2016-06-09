@@ -5,7 +5,7 @@ var io = require('socket.io')(http);
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort;
 
-var serialPort = new SerialPort("/dev/cu.usbmodem1411", {
+var serialPort = new SerialPort("/dev/cu.Bluetooth-Incoming-Port", {
   baudrate: 115200,
   parser: serialport.parsers.readline("\n")
 });

@@ -21,3 +21,16 @@ div.kreis {
   border-radius: 1px;
   background-color: chartreuse;
 }
+
+div.big{
+    background-color: darkblue;
+    height: 61.8%;
+    width: 100%;
+    float: left;
+}
+div.small{
+    background-color: darkslateblue;
+    height: 38.2%;
+    width: 100%;
+    float: left;
+}

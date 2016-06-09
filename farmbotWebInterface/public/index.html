@@ -1,42 +1,40 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Farmbot Interface</title>
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script src="../node_modules/angular/angular.min.js "></script>
-    <script src="js/app.js "></script>
-    <script src="js/directives.js "></script>
-    <link rel="stylesheet" href="css/style.css">
-  </head>
-  <body ng-app="myApp" ng-controller="myCtrl" >
-      <!--onresize="onResize()"-->
-   <div class="controlPanel">
-       <div my-customer></div>
-       Width:
-       <input type="text" ng-model="fieldWidth">
-       Height:
-       <input type="text" ng-model="fieldHeight">
-       <br>
-       Field length 1,5 m , 15000 mm/100 
-       Field width 1 m , 10000 mm/100 
-       <br>
-       {{fieldWidth}}
-       <br>
-       {{fieldHeight}}
-       <br>
-       <br>
-       Div zeroponit is here:
-       <br>
-       ({{zeropointpixel_x}} | {{zeropointpixel_y}})
-       <br>
-       Our div is {{divwidth}} x {{divheight}} px 
-       <br>
-       <br>
-       Last click event was on:
-       <br>
-       ({{offsetX}}|{{offsetY}})
-   </div>
-   <div class="coordinateSystem" ng-click="doClick($event)" id="coordinateSystem" make-responsive>
-   </div>
-  </body>
+
+<head>
+  <title>Farmbot Interface</title>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="../node_modules/angular/angular.min.js "></script>
+  <script src="js/app.js "></script>
+  <script src="js/directives.js "></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body ng-app="myApp" ng-controller="myCtrl">
+  <!--onresize="onResize()"-->
+  <div class="controlPanel">
+    <div class="small"></div>
+
+    <div class="big">
+
+
+      Width:
+      <input type="text" ng-model="fieldWidth"> Height:
+      <input type="text" ng-model="fieldHeight">
+      <br> Field length 1,5 m , 15000 mm/100 Field width 1 m , 10000 mm/100
+      <br> {{fieldWidth}}
+      <br> {{fieldHeight}}
+      <br>
+      <br> Div zeroponit is here:
+      <br> ({{zeropointpixel_x}} | {{zeropointpixel_y}})
+      <br> Our div is {{divwidth}} x {{divheight}} px
+      <br>
+      <br> Last click event was on:
+      <br> ({{offsetX}}|{{offsetY}})
+    </div>
+  </div>
+
+  <div class="coordinateSystem" ng-click="doClick($event)" id="coordinateSystem" make-responsive></div>
+</body>
+
 </html>
