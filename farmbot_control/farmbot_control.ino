@@ -8,17 +8,17 @@
 #define VERSION "v0.2"
 #define BAUD 115200
 //                           X     Y     Z                         X     Y     Z
-const float axisSpeed[3] = {1500},                axisAccel[3] = {2500, 2500, 5000},
-          homingSpeed[3] = {500},               homingAccel[3] = {50000},
-           calibSpeed[3] = {100},                calibAccel[3] = {50000};
+const float axisSpeed[3] = {1500, 1500, 1500},    axisAccel[3] = {1500, 2500, 5000},
+          homingSpeed[3] =  {250,  500,  500},    homingAccel[3] = {5000, 10000, 10000},
+           calibSpeed[3] = { 100,  100,  100},    calibAccel[3] = {50000, 50000, 50000};
 
 //position constants
-const long toolsPos[] = {10,10,0},   //first holder position (top)
-           toolPitch = 10,           //how far tool holders are spaced apart
-           toolPickupDepth = 100,    //how far to move down to pickup tool from holder
+const long toolsPos[] = {0,602,0},   //first holder position (top)
+           toolPitch = 512,           //how far tool holders are spaced apart
+           toolPickupDepth = 7500,    //how far to move down to pickup tool from holder
            toolPutBackDepth = 101,   //how far to move down to put tool back in holder
-           toolMoveOut = 100,        //how far to move tool out of holder
-           toolMoveUp = 100;         //how far to move up after picking up / putting back tool
+           toolMoveOut = 500,        //how far to move tool out of holder
+           toolMoveUp = 500;         //how far to move up after picking up / putting back tool
 
 
 const float XmmToStepsFactor = 5.0167224080267558528428093645485,
@@ -34,7 +34,7 @@ bool mode_abs = false, homingInProgress = false, pickupInProgress = false;
 long tmpPickupPos[3];
 
 enum homingModes {homeDone, runHome, moveAway, calibrate};
-homingModes curHomingMode[3] = {runHome}; //current state of axes
+homingModes curHomingMode[3] = {runHome, runHome, runHome}; //current state of axes
 enum tools {noTool, toolA, toolB, toolC, toolD}; //can also be used as just ids due to enum
 tools currentTool = noTool, putBackTool = noTool;
 enum pickupModes {p_done, p_goOverTools, p_moveDown, p_moveTool, p_moveUp, p_goHome};
@@ -96,18 +96,22 @@ void setup() {
   pinMode(X_ENABLE_PIN, OUTPUT);
   pinMode(Y_ENABLE_PIN, OUTPUT);
   pinMode(Z_ENABLE_PIN, OUTPUT);
+  pinMode(Z_MIN_PIN, INPUT_PULLUP);
   setSpeed(axisSpeed, axisAccel);
   for(int i = 0; i < 3; i++)
   {
     /*stepperAxis[i]->setMaxSpeed    (axisSpeed[i]);
     stepperAxis[i]->setAcceleration(axisAccel[i]);*/
-    steppers.addStepper(*(stepperAxis[i])); //not sure if works
+    //steppers.addStepper(*(stepperAxis[i])); //not sure if works
   }
   /*steppers.addStepper(stepper1);
   steppers.addStepper(stepper2);
   steppers.addStepper(stepper3);*/
   switchSteppers(true);
   ready();
+  delay(1000);
+  Serial.println("homing started");
+  home();
 
 }
 
@@ -122,9 +126,13 @@ void loop() {
     checkHome();
   else if(pickupInProgress)
     checkPickup();
-  stepper1.run();
+  /*stepper1.run();
   stepper2.run();
-  stepper3.run();
+  stepper3.run();*/
+  for(int i = 0; i < 3; i++)
+  {
+    stepperAxis[i]->run();
+  }
   //steppers.run();
 
 }
@@ -134,8 +142,8 @@ void help() {
   Serial.print(F("Farmbot Motor controller "));
   Serial.println(VERSION);
   Serial.println(F("Commands:"));
-  Serial.println(F("G00 [X(steps)] [Y(steps)] [F(feedrate)]; - linear move"));
-  Serial.println(F("G01 [X(steps)] [Y(steps)] [F(feedrate)]; - linear move"));
+  Serial.println(F("G00 [X(mm)] [Y(mm) Z(mm)]; - linear move"));
+  Serial.println(F("G01 [X(steps)] [Y(steps) Z(steps)]; - linear move"));
   Serial.println(F("G04 P[seconds]; - delay"));
   Serial.println(F("G28; - calibrate axes (homing)"));
   Serial.println(F("G90; - absolute mode"));
@@ -270,13 +278,14 @@ void checkPickup()
 void home()
 {
   homingInProgress = true;
-  if(checkHome()) //check if homing is necessary
+  if(!checkHome()) //check if homing is not done
   {
     setSpeed(homingSpeed, homingAccel);
     for(int i = 0; i < 3; i++)
     {
       /*stepperAxis[i]->setMaxSpeed    (homingSpeed);
       stepperAxis[i]->setAcceleration(homingAccel);*/
+      Serial.println(stepperAxis[i]->maxSpeed());
       curHomingMode[i] = runHome;
       stepperAxis[i]->moveTo(-100000);
     }
@@ -289,6 +298,8 @@ bool checkHome()
   int stillHoming = 3; //count of unhomed axes
   for(int i = 0; i < 3; i++) //check for all 3 axes
   {
+    //Serial.print(curHomingMode[i]);
+    //Serial.print(" ");
     switch(curHomingMode[i])
     {
       case runHome:
@@ -302,7 +313,9 @@ bool checkHome()
       case moveAway:
         if(!stepperAxis[i]->isRunning())
         {
-          setSpeed(calibSpeed, calibAccel);
+          //setSpeed(calibSpeed, calibAccel);
+          stepperAxis[i]->setMaxSpeed    (calibSpeed[i]);
+          stepperAxis[i]->setAcceleration(calibAccel[i]);
           stepperAxis[i]->moveTo(-100000);
           curHomingMode[i] = calibrate;
         }
@@ -321,7 +334,12 @@ bool checkHome()
     }
   }
   if(!stillHoming) //returns true, if all axes are at their endStops
+  {
     homingInProgress = false;
+    setSpeed(axisSpeed, axisAccel);
+    ready();
+  }
+  //Serial.print(stillHoming);
   return !stillHoming;
 }
 
@@ -362,12 +380,17 @@ float parsenum(char code, float val)
 
 void newPos()
 {
-  positions[0] = curX;
+  /*positions[0] = curX;
   positions[1] = curY;
-  positions[2] = curZ;
-  stepper1.moveTo(positions[0]);
+  positions[2] = curZ;*/
+  /*stepper1.moveTo(positions[0]);
   stepper2.moveTo(positions[1]);
-  stepper3.moveTo(positions[2]);
+  stepper3.moveTo(positions[2]);*/
+  for(int i = 0; i < 3; i++)
+  {
+    stepperAxis[i]->moveTo(positions[i]);
+    Serial.println(stepperAxis[i]->distanceToGo());
+  }
   //steppers.moveTo(positions);
   Serial.println(positions[0]);
   Serial.println(positions[1]);
@@ -399,14 +422,22 @@ void processCommand()
   switch(cmd)
   {
     case  0:
+      positions[0] = round((parsenum('X', 0)*XmmToStepsFactor));
+      positions[1] = round((parsenum('Y', 0)*YmmToStepsFactor));
+      positions[2] = round((parsenum('Z', 0)*ZmmToStepsFactor));
+      newPos();
+      break;
     case  1:
       /*Serial.println(parsenum('X',(mode_abs?curX:0)) + (mode_abs?0:curX));
       curX = round((parsenum('X',(mode_abs?curX:0)) + (mode_abs?0:curX))*XmmToStepsFactor);
       curY = round((parsenum('Y',(mode_abs?curY:0)) + (mode_abs?0:curY))*YmmToStepsFactor);
       curZ = round((parsenum('Z',(mode_abs?curZ:0)) + (mode_abs?0:curZ))*ZmmToStepsFactor);*/
-      curX = round((parsenum('X', 0)*XmmToStepsFactor));
+      /*curX = round((parsenum('X', 0)*XmmToStepsFactor));
       curY = round((parsenum('Y', 0)*YmmToStepsFactor));
-      curZ = round((parsenum('Z', 0)*ZmmToStepsFactor));
+      curZ = round((parsenum('Z', 0)*ZmmToStepsFactor));*/
+      positions[0] = round(parsenum('X', 0));
+      positions[1] = round(parsenum('Y', 0));
+      positions[2] = round(parsenum('Z', 0));
       newPos();
       break;
     case  4:  pause(parsenum('P',0)*1000); break;
@@ -417,8 +448,8 @@ void processCommand()
   }
   cmd = parsenum('M',-1);
   switch(cmd) {
-    case 18:   switchSteppers(false);
-    case 19:   switchSteppers(true);
+    case 18:   switchSteppers(false); break;
+    case 19:   switchSteppers(true); break;
     case 100:  help();  break;
     case 114:  printPos();  break;
     default:  break;
