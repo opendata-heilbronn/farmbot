@@ -5,12 +5,12 @@
 
 
 
-#define VERSION "v0.2"
+#define VERSION "v0.3"
 #define BAUD 115200
-//                           X     Y     Z                         X     Y     Z
-const float axisSpeed[3] = {1500, 1500, 1500},    axisAccel[3] = {1500, 2500, 5000},
-          homingSpeed[3] =  {250,  500,  500},    homingAccel[3] = {5000, 10000, 10000},
-           calibSpeed[3] = { 100,  100,  100},    calibAccel[3] = {50000, 50000, 50000};
+//                            X     Y     Z                           X       Y      Z
+const float axisSpeed[3] = {1500, 1500, 1500},    axisAccel[3] =    {1500,  2500,   5000},
+          homingSpeed[3] =  {250,  500,  500},    homingAccel[3] =  {5000,  10000, 10000},
+           calibSpeed[3] =  {100,  100,  100},    calibAccel[3] =  {50000,  50000, 50000};
 
 //position constants
 const long toolsPos[] = {0,602,0},   //first holder position (top)
@@ -67,9 +67,10 @@ AccelStepper stepper2(1, Y_STEP_PIN, Y_DIR_PIN);
 AccelStepper stepper3(1, Z_STEP_PIN, Z_DIR_PIN);
 MultiStepper steppers;
 AccelStepper* stepperAxis[] = {&stepper1, &stepper2, &stepper3};
-long positions[3];
-const int endSwitch[] = {X_MIN_PIN, Y_MIN_PIN, Z_MIN_PIN};
 
+long positions[3];
+const int minEndSwitch[] = {X_MIN_PIN, Y_MIN_PIN, Z_MIN_PIN};
+const int maxEndSwitch[] = {X_MAX_PIN, Y_MAX_PIN, Z_MAX_PIN};
 
 void switchSteppers(bool on)
 {
@@ -96,7 +97,12 @@ void setup() {
   pinMode(X_ENABLE_PIN, OUTPUT);
   pinMode(Y_ENABLE_PIN, OUTPUT);
   pinMode(Z_ENABLE_PIN, OUTPUT);
+  pinMode(X_MIN_PIN, INPUT_PULLUP);
+  pinMode(X_MAX_PIN, INPUT_PULLUP);
+  pinMode(Y_MIN_PIN, INPUT_PULLUP);
+  pinMode(Y_MAX_PIN, INPUT_PULLUP);
   pinMode(Z_MIN_PIN, INPUT_PULLUP);
+  pinMode(Z_MAX_PIN, INPUT_PULLUP);
   setSpeed(axisSpeed, axisAccel);
   for(int i = 0; i < 3; i++)
   {
@@ -117,15 +123,16 @@ void setup() {
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
   while(Serial.available())
   {
     serialListener();
   }
+  
   if(homingInProgress)
     checkHome();
   else if(pickupInProgress)
     checkPickup();
+  
   /*stepper1.run();
   stepper2.run();
   stepper3.run();*/
@@ -176,7 +183,9 @@ bool isStopped()
   bool stopped = true;
   for(int i = 0; i < 3; i++)
   {
-    stopped = !stepperAxis[i]->isRunning();
+    //Won't work
+    //stopped = !stepperAxis[i]->isRunning();
+    stopped = stopped && !stepperAxis[i]->isRunning();
   }
   return stopped; //returns false if any axes is still running
 }
@@ -303,7 +312,7 @@ bool checkHome()
     switch(curHomingMode[i])
     {
       case runHome:
-        if(digitalRead(endSwitch[i]))
+        if(digitalRead(minEndSwitch[i]))
         {
           stepperAxis[i]->stop();
           stepperAxis[i]->moveTo(stepperAxis[i]->currentPosition()+100); //move some distance away from sensor
@@ -321,7 +330,7 @@ bool checkHome()
         }
         break;
       case calibrate:
-        if(digitalRead(endSwitch[i]))
+        if(digitalRead(minEndSwitch[i]))
         {
           stepperAxis[i]->stop();
           stepperAxis[i]->setCurrentPosition(0);
@@ -371,8 +380,8 @@ float parsenum(char code, float val)
   {
     return val;
   }
-  byte ende = buf.substring(start).indexOf(" ");
-  String result = buf.substring(start+1,start+ende);
+  byte end = buf.substring(start).indexOf(" ");
+  String result = buf.substring(start+1,start+end);
   float resFloat = result.toFloat();
   return resFloat;
 }
