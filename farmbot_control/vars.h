@@ -1,7 +1,8 @@
 #ifndef VARS_H
 #define VARS_H
 
-String buf = "                                                                ";
+char buf[bufSize];
+String bufStr;
 byte bufIdx;
 bool mode_abs = false, homingInProgress = false, pickupInProgress = false;
 long tmpPickupPos[3];

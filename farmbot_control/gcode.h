@@ -23,13 +23,13 @@ void help() {
 
 float parsenum(char code, float val)
 {
-  byte start = buf.indexOf(code);
+  byte start = bufStr.indexOf(code);
   if(start == 255)
   {
     return val;
   }
-  byte end = buf.substring(start).indexOf(" ");
-  String result = buf.substring(start+1,start+end);
+  byte end = bufStr.substring(start).indexOf(" ");
+  String result = bufStr.substring(start+1,start+end);
   float resFloat = result.toFloat();
   return resFloat;
 }
@@ -112,8 +112,9 @@ void serialListener()
   }
   if(c=='\n')
   {
-    buf[bufIdx] = 0; //Strings must end with 0
+    //buf[bufIdx] = 0; //Strings must end with 0
     Serial.println(buf);
+    bufStr = String(buf);
     processCommand();
     ready(); //ready for new command
   }

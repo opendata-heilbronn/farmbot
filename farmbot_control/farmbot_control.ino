@@ -18,25 +18,26 @@ void setup() {
   pinMode(Z_MAX_PIN, INPUT_PULLUP);
   setSpeed(axisSpeed, axisAccel);
   switchSteppers(true);
+
   ready();
   delay(1000);
   Serial.println("homing started");
-  //home();
+  home();
 }
 
 
 void loop() {
 
-  while(Serial.available())
+  if(Serial.available())
   {
     serialListener();
   }
-  
+
   if(homingInProgress)
     checkHome();
-  else if(pickupInProgress)
-    //checkPickup();
-  
+  /*else if(pickupInProgress)
+    checkPickup();*/
+
   for(int i = 0; i < 3; i++)
   {
     stepperAxis[i]->run();

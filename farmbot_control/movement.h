@@ -30,7 +30,7 @@ bool checkHome()
     switch(curHomingMode[i])
     {
       case runHome:
-        if(digitalRead(minEndSwitch[i]))
+        if(!digitalRead(minEndSwitch[i]))
         {
           stepperAxis[i]->stop();
           stepperAxis[i]->moveTo(stepperAxis[i]->currentPosition()+100); //move some distance away from sensor
@@ -48,7 +48,7 @@ bool checkHome()
         }
         break;
       case calibrate:
-        if(digitalRead(minEndSwitch[i]))
+        if(!digitalRead(minEndSwitch[i]))
         {
           stepperAxis[i]->stop();
           stepperAxis[i]->setCurrentPosition(0);
@@ -79,8 +79,6 @@ void home()
     setSpeed(homingSpeed, homingAccel);
     for(int i = 0; i < 3; i++)
     {
-      /*stepperAxis[i]->setMaxSpeed    (homingSpeed);
-      stepperAxis[i]->setAcceleration(homingAccel);*/
       Serial.println(stepperAxis[i]->maxSpeed());
       curHomingMode[i] = runHome;
       stepperAxis[i]->moveTo(-100000);

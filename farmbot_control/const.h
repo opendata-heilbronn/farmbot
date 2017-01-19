@@ -31,7 +31,7 @@ tools currentTool = noTool, putBackTool = noTool;
 enum pickupModes {p_done, p_goOverTools, p_moveDown, p_moveTool, p_moveUp, p_goHome};
 pickupModes currentPickupMode = p_done;
 //                            X     Y     Z                           X       Y      Z
-const float axisSpeed[3] = {1500, 1500, 1500},    axisAccel[3] =    {1500,  2500,   5000},
+const float axisSpeed[3] = {1500, 1500, 1500},    axisAccel[3] =    {1500,  2500,   2000},
           homingSpeed[3] =  {250,  500,  500},    homingAccel[3] =  {5000,  10000, 10000},
            calibSpeed[3] =  {100,  100,  100},    calibAccel[3] =  {50000,  50000, 50000};
 
@@ -44,8 +44,8 @@ const long toolsPos[] = {0,602,0},   //first holder position (top)
            toolMoveUp = 500;         //how far to move up after picking up / putting back tool
 
 
-const float XmmToStepsFactor = 5.0167224080267558528428093645485,
-            YmmToStepsFactor = 5.0167224080267558528428093645485,
+const float XmmToStepsFactor = 4*5.0167224080267558528428093645485,
+            YmmToStepsFactor = 4*5.0167224080267558528428093645485,
             ZmmToStepsFactor = 25;
 
 #endif
