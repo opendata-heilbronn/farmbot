@@ -1,9 +1,4 @@
-#include <Arduino.h>
-
 #include <AccelStepper.h>
-#include <MultiStepper.h>
-
-
 
 #define VERSION "v0.3"
 #define BAUD 115200
@@ -27,7 +22,6 @@ const float XmmToStepsFactor = 5.0167224080267558528428093645485,
 
 
 #define bufSize 64
-//char buf[bufSize];
 String buf = "                                                                ";
 byte bufIdx;
 bool mode_abs = false, homingInProgress = false, pickupInProgress = false;
@@ -65,7 +59,7 @@ long curX, curY, curZ;
 AccelStepper stepper1(1, X_STEP_PIN, X_DIR_PIN);
 AccelStepper stepper2(1, Y_STEP_PIN, Y_DIR_PIN);
 AccelStepper stepper3(1, Z_STEP_PIN, Z_DIR_PIN);
-MultiStepper steppers;
+//MultiStepper steppers;
 AccelStepper* stepperAxis[] = {&stepper1, &stepper2, &stepper3};
 
 long positions[3];
@@ -91,7 +85,6 @@ void setSpeed(const float* speedArr, const float* accelArr) //TODO test if works
 
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(BAUD);
   help();
   pinMode(X_ENABLE_PIN, OUTPUT);
@@ -104,25 +97,16 @@ void setup() {
   pinMode(Z_MIN_PIN, INPUT_PULLUP);
   pinMode(Z_MAX_PIN, INPUT_PULLUP);
   setSpeed(axisSpeed, axisAccel);
-  for(int i = 0; i < 3; i++)
-  {
-    /*stepperAxis[i]->setMaxSpeed    (axisSpeed[i]);
-    stepperAxis[i]->setAcceleration(axisAccel[i]);*/
-    //steppers.addStepper(*(stepperAxis[i])); //not sure if works
-  }
-  /*steppers.addStepper(stepper1);
-  steppers.addStepper(stepper2);
-  steppers.addStepper(stepper3);*/
   switchSteppers(true);
   ready();
   delay(1000);
   Serial.println("homing started");
   home();
-
 }
 
 
 void loop() {
+
   while(Serial.available())
   {
     serialListener();
@@ -131,17 +115,12 @@ void loop() {
   if(homingInProgress)
     checkHome();
   else if(pickupInProgress)
-    checkPickup();
+    //checkPickup();
   
-  /*stepper1.run();
-  stepper2.run();
-  stepper3.run();*/
   for(int i = 0; i < 3; i++)
   {
     stepperAxis[i]->run();
   }
-  //steppers.run();
-
 }
 
 
@@ -170,28 +149,20 @@ void ready() {
   Serial.print(F("> ")); // signal ready to receive input
 }
 
-
-void goHome()
-{
-  long homePos[] = {0};
-  steppers.moveTo(homePos);
-}
-
-
+//returns false if any axes is still running
 bool isStopped()
 {
   bool stopped = true;
   for(int i = 0; i < 3; i++)
   {
-    //Won't work
-    //stopped = !stepperAxis[i]->isRunning();
     stopped = stopped && !stepperAxis[i]->isRunning();
   }
-  return stopped; //returns false if any axes is still running
+  return stopped;
 }
 
 
-void pickupTool(tools tool)
+//TODO: rewrite for AccelStepper Array
+/*void pickupTool(tools tool)
 {
   if(currentTool != noTool)
   {
@@ -214,8 +185,10 @@ void pickupTool(tools tool)
   steppers.moveTo(tmpPickupPos);
   currentPickupMode = p_goOverTools;
 }
+*/
 
-
+//TODO: rewrite for AccelStepper Array
+/*
 void checkPickup()
 {
   switch(currentPickupMode)
@@ -250,14 +223,14 @@ void checkPickup()
         if(putBackTool == noTool)
         {
           currentPickupMode = p_goHome;
-          goHome();
+          home();
         }
         else //after putting toool back and picking new up
         {
           if(putBackTool == 255) //if no new tool is meant to be picked up
           {
             currentPickupMode = p_goHome;
-            goHome();
+            home();
           }
           else
           {
@@ -281,7 +254,7 @@ void checkPickup()
       break;
     default: break;
   }
-}
+}*/
 
 
 void home()
@@ -356,7 +329,6 @@ bool checkHome()
 void serialListener()
 {
   char c = Serial.read();
-  //Serial.print(c); //pong back the received command
   if(bufIdx < bufSize)
   {
     buf[bufIdx] = c;
@@ -364,7 +336,6 @@ void serialListener()
   }
   if(c=='\n')
   {
-    //Serial.print(F("\r\n")); //pong back line feed
     buf[bufIdx] = 0; //Strings must end with 0
     Serial.println(buf);
     processCommand();
@@ -389,18 +360,11 @@ float parsenum(char code, float val)
 
 void newPos()
 {
-  /*positions[0] = curX;
-  positions[1] = curY;
-  positions[2] = curZ;*/
-  /*stepper1.moveTo(positions[0]);
-  stepper2.moveTo(positions[1]);
-  stepper3.moveTo(positions[2]);*/
   for(int i = 0; i < 3; i++)
   {
     stepperAxis[i]->moveTo(positions[i]);
     Serial.println(stepperAxis[i]->distanceToGo());
   }
-  //steppers.moveTo(positions);
   Serial.println(positions[0]);
   Serial.println(positions[1]);
   Serial.println(positions[2]);
@@ -427,7 +391,6 @@ void pause(long ms) {
 void processCommand()
 {
   int cmd = parsenum('G',-1);
-  //Serial.println(cmd);
   switch(cmd)
   {
     case  0:
@@ -437,13 +400,6 @@ void processCommand()
       newPos();
       break;
     case  1:
-      /*Serial.println(parsenum('X',(mode_abs?curX:0)) + (mode_abs?0:curX));
-      curX = round((parsenum('X',(mode_abs?curX:0)) + (mode_abs?0:curX))*XmmToStepsFactor);
-      curY = round((parsenum('Y',(mode_abs?curY:0)) + (mode_abs?0:curY))*YmmToStepsFactor);
-      curZ = round((parsenum('Z',(mode_abs?curZ:0)) + (mode_abs?0:curZ))*ZmmToStepsFactor);*/
-      /*curX = round((parsenum('X', 0)*XmmToStepsFactor));
-      curY = round((parsenum('Y', 0)*YmmToStepsFactor));
-      curZ = round((parsenum('Z', 0)*ZmmToStepsFactor));*/
       positions[0] = round(parsenum('X', 0));
       positions[1] = round(parsenum('Y', 0));
       positions[2] = round(parsenum('Z', 0));
@@ -464,6 +420,6 @@ void processCommand()
     default:  break;
   }
   byte toolID = parsenum('T', -1);
-  if(toolID != -1)
-    pickupTool(static_cast<tools>(toolID));
+  //if(toolID != -1)
+    //pickupTool(static_cast<tools>(toolID));
 }
