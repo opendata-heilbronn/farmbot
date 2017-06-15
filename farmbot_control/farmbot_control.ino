@@ -3,10 +3,11 @@
 #include "stepper.h"
 #include "vars.h"
 #include "gcode.h"
+#include "gadgets.h"
 
 void setup() {
   Serial.begin(BAUD);
-  help();
+  //help();
   pinMode(X_ENABLE_PIN, OUTPUT);
   pinMode(Y_ENABLE_PIN, OUTPUT);
   pinMode(Z_ENABLE_PIN, OUTPUT);
@@ -18,10 +19,11 @@ void setup() {
   pinMode(Z_MAX_PIN, INPUT_PULLUP);
   setSpeed(axisSpeed, axisAccel);
   switchSteppers(true);
+  initGadgets();
 
   ready();
   delay(1000);
-  Serial.println("homing started");
+  //Serial.println("homing started");
   home();
 }
 
@@ -38,103 +40,51 @@ void loop() {
   /*else if(pickupInProgress)
     checkPickup();*/
 
+  //Check all axeses
   for(int i = 0; i < 3; i++)
   {
-    stepperAxis[i]->run();
-  }
-}
+    bool stateMin = !digitalRead(minEndSwitch[i]);
+    bool stateMax = !digitalRead(maxEndSwitch[i]);
 
-//TODO: rewrite for AccelStepper Array
-/*void pickupTool(tools tool)
-{
-  if(currentTool != noTool)
-  {
-    tmpPickupPos[0] = toolsPos[0] + toolMoveOut;
-    tmpPickupPos[1] = toolsPos[1]+currentTool*toolPitch; //calculate y of the corresponding tool holder
-    putBackTool = tool; //save tool to pickup after current tool was put back
-    if(tool == noTool) //if the current tool is meant to be put back and no new tool to be picked up
-    {
-      putBackTool = static_cast<tools>(255); //dummy tool, else the state machine would act like it is in pickup mode instead of put back mode [probably smashing the tool to pieces]
+    short distance = stepperAxis[i]->distanceToGo();
+
+    //Is this axis still running?
+    if(stepperAxis[i]->isRunning()){
+
+      //Did it hit the Min Switch?
+      if(stateMin &&  distance < 0){
+        
+        stepperAxis[i]->setCurrentPosition(0);
+        stepperAxis[i]->moveTo(stepperAxis[i]->currentPosition()+15);
+
+      //Did it hit the Max Switch?
+      }else if(stateMax && distance > 0){
+        
+        switch(i){
+          case 0:
+            stepperAxis[i]->setCurrentPosition(22784);
+          break;
+        }
+        
+        stepperAxis[i]->moveTo(stepperAxis[i]->currentPosition()-15);
+
+      //Nothing hitted, we are fine!  
+      }else{
+
+        //Has the Z-Axis already stopped?
+        if((i != 2 && stepperAxis[2]->distanceToGo() == 0) || (i == 2 && stepperAxis[2]->distanceToGo() != 0)){
+          stepperAxis[i]->run();
+        }
+      }
+      
     }
   }
-  else
-  {
-    tmpPickupPos[0] = toolsPos[0];
-    tmpPickupPos[1] = toolsPos[1]+tool*toolPitch; //calculate y of the corresponding tool holder
-    currentTool = tool;
-  }
-  tmpPickupPos[2] = toolsPos[2];
 
-  steppers.moveTo(tmpPickupPos);
-  currentPickupMode = p_goOverTools;
+  //Have we stopped? If yes: Report it to the Host
+  if(!stopped && !stepperAxis[0]->isRunning() && !stepperAxis[1]->isRunning() && !stepperAxis[2]->isRunning()){
+    stopped = true;
+    setSpeed(axisSpeed, axisAccel);
+    Serial.println("ok");  
+  }
+
 }
-*/
-
-//TODO: rewrite for AccelStepper Array
-/*
-void checkPickup()
-{
-  switch(currentPickupMode)
-  {
-    case p_goOverTools:
-      if(isStopped())
-      {
-        currentPickupMode = p_moveDown;
-        tmpPickupPos[2] = (putBackTool == noTool) ? toolPickupDepth : toolPutBackDepth;  //tmpPickupPos for x/y will stay the same | set how far to move down based on putting tool back or picking it up
-        steppers.moveTo(tmpPickupPos);
-      }
-      break;
-    case p_moveDown:
-      if(isStopped())
-      {
-        currentPickupMode = p_moveTool;
-        tmpPickupPos[0] += (putBackTool == noTool) ? +toolMoveOut : -toolMoveOut; //tmpPickupPos for x/z will stay the same | move tool either in or out (put back / pick up)
-        steppers.moveTo(tmpPickupPos);
-      }
-      break;
-    case p_moveTool:
-      if(isStopped())
-      {
-        currentPickupMode = p_moveUp;
-        tmpPickupPos[2] -= toolMoveUp; //tmpPickupPos for x/y will stay the same
-        steppers.moveTo(tmpPickupPos);
-      }
-      break;
-    case p_moveUp:
-      if(isStopped())
-      {
-        if(putBackTool == noTool)
-        {
-          currentPickupMode = p_goHome;
-          home();
-        }
-        else //after putting toool back and picking new up
-        {
-          if(putBackTool == 255) //if no new tool is meant to be picked up
-          {
-            currentPickupMode = p_goHome;
-            home();
-          }
-          else
-          {
-            currentPickupMode = p_goOverTools;
-            currentTool = putBackTool;
-            putBackTool = noTool;
-            tmpPickupPos[0] = toolsPos[0];
-            tmpPickupPos[1] = toolsPos[1]+currentTool*toolPitch; //calculate y of the corresponding tool holder
-            //tmpPickupPos[2] = toolsPos[2];  //should stay at same height after putting back tool to avoid unnecessary z-movement
-            steppers.moveTo(tmpPickupPos);
-          }
-        }
-      }
-      break;
-    case p_goHome:
-      if(isStopped())
-      {
-        ready();
-      }
-
-      break;
-    default: break;
-  }
-}*/

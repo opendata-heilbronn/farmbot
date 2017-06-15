@@ -8,7 +8,7 @@ void ready() {
     buf[i] = 0;
   }
   bufStr = "";
-  Serial.print(F("> ")); // signal ready to receive input
+  //Serial.print(F("> ")); // signal ready to receive input
 }
 
 #endif

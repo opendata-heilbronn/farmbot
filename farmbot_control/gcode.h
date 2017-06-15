@@ -2,6 +2,7 @@
 #define GCODE_H
 
 #include "movement.h"
+#include "gadgets.h"
 
 void help() {
   Serial.print(F("Farmbot Motor controller "));
@@ -40,11 +41,10 @@ void newPos()
   for(int i = 0; i < 3; i++)
   {
     stepperAxis[i]->moveTo(positions[i]);
-    Serial.println(stepperAxis[i]->distanceToGo());
+    distToGo[i] = stepperAxis[i]->distanceToGo();
   }
-  Serial.println(positions[0]);
-  Serial.println(positions[1]);
-  Serial.println(positions[2]);
+
+  stopped = false;
 }
 
 
@@ -82,9 +82,11 @@ void processCommand()
       newPos();
       break;
     case  4:  pause(parsenum('P',0)*1000); break;
-    case 28:  home(); break;
+    case 28:  homingInProgress = true ; break;
     case 90:  mode_abs=1;  break;  // absolute mode
     case 91:  mode_abs=0;  break;  // relative mode
+    case 92:  turnVacOn(); break;
+    case 93:  turnVacOff(); break;
     default:  break;
   }
   cmd = parsenum('M',-1);
@@ -113,7 +115,7 @@ void serialListener()
   if(c=='\n')
   {
     //buf[bufIdx] = 0; //Strings must end with 0
-    Serial.println(buf);
+    //Serial.println(buf);
     bufStr = String(buf);
     processCommand();
     ready(); //ready for new command
