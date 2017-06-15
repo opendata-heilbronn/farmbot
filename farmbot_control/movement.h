@@ -65,8 +65,8 @@ bool checkHome()
     homingInProgress = false;
     setSpeed(axisSpeed, axisAccel);
     ready();
+    Serial.println("ok");
   }
-  //Serial.print(stillHoming);
   return !stillHoming;
 }
 
@@ -79,7 +79,7 @@ void home()
     setSpeed(homingSpeed, homingAccel);
     for(int i = 0; i < 3; i++)
     {
-      Serial.println(stepperAxis[i]->maxSpeed());
+      //Serial.println(stepperAxis[i]->maxSpeed());
       curHomingMode[i] = runHome;
       stepperAxis[i]->moveTo(-100000);
     }

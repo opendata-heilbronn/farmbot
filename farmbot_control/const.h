@@ -31,8 +31,8 @@ tools currentTool = noTool, putBackTool = noTool;
 enum pickupModes {p_done, p_goOverTools, p_moveDown, p_moveTool, p_moveUp, p_goHome};
 pickupModes currentPickupMode = p_done;
 //                            X     Y     Z                           X       Y      Z
-const float axisSpeed[3] = {1500, 1500, 1500},    axisAccel[3] =    {1500,  2500,   2000},
-          homingSpeed[3] =  {250,  500,  500},    homingAccel[3] =  {5000,  10000, 10000},
+const float axisSpeed[3] = {1500, 1500, 1500},    axisAccel[3] =    {1100, 900, 700},
+          homingSpeed[3] =  {750,  500,  500},    homingAccel[3] =  {5000,  10000, 10000},
            calibSpeed[3] =  {100,  100,  100},    calibAccel[3] =  {50000,  50000, 50000};
 
 //position constants

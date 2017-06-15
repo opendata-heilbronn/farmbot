@@ -53,8 +53,8 @@ void playNote(int noteInt, long length, long tempo = oldTempo,long breath = 0){
 void loop() {
   // put your main code here, to run repeatedly:
   playSong("He's a Pirate");
-  //playSong("Can Can");
-  //playSong("Song of Storms");
+  playSong("Can Can");
+  playSong("Song of Storms");
 }
 
 
