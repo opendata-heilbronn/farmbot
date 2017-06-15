@@ -494,7 +494,7 @@
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 300, 300, 300, 25 }
+#define DEFAULT_MAX_FEEDRATE          { 300, 300, 50, 25 }
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -502,7 +502,7 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 30, 50, 100, 10000 }
+#define DEFAULT_MAX_ACCELERATION      { 200, 300, 300, 10000 }
 
 /**
  * Default Acceleration (change/s) change = mm/s
@@ -738,9 +738,9 @@
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
-#define X_MAX_POS 1000
-#define Y_MAX_POS 750
-#define Z_MAX_POS 600
+#define X_MAX_POS 1145
+#define Y_MAX_POS 720
+#define Z_MAX_POS 280
 
 // If enabled, axes won't move below MIN_POS in response to movement commands.
 #define MIN_SOFTWARE_ENDSTOPS
