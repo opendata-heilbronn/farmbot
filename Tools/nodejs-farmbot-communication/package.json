@@ -1,0 +1,25 @@
+{
+  "name": "serial-communication",
+  "version": "1.0.0",
+  "description": "Send F-/G-Code to your Farmbot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opendata-heilbronn/Farmbot-communication.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/opendata-heilbronn/Farmbot-communication/issues"
+  },
+  "homepage": "https://github.com/opendata-heilbronn/Farmbot-communication#readme",
+  "dependencies": {
+    "Console": "^1.1.0",
+    "console": "^0.6.4",
+    "serialport": "^6.0.4"
+  }
+}
